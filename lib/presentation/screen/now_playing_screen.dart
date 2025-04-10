@@ -128,17 +128,30 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
       // Tạo danh sách bài hát
       final playlist = ConcatenatingAudioSource(
         children: widget.songList
-            .map((song) => AudioSource.asset(song.assetPath,
-                tag: MediaItem(
-                  id: song.id,
-                  title: song.title,
-                  artist: song.artist,
-                  artUri: Uri.parse('asset:/${song.coverImage}'),
-                )))
+            .map((song) => AudioSource.asset(
+                  song.fullAssetPath,
+                  tag: MediaItem(
+                    id: song.id,
+                    title: song.title,
+                    artist: song.artist,
+                    artUri: Uri.parse('asset:///${song.fullCoverPath}'),
+                  ),
+                ))
             .toList(),
       );
 
+      // In ra để debug
+      print(
+          'Đang cố gắng tải bài hát từ: ${widget.songList[_currentIndex].fullAssetPath}');
+      print('Tên bài hát: ${widget.songList[_currentIndex].title}');
+
+      // Thiết lập nguồn âm thanh và chơi
       await _audioPlayer.setAudioSource(playlist, initialIndex: _currentIndex);
+
+      // Đảm bảo volume được thiết lập
+      await _audioPlayer.setVolume(1.0);
+
+      // Bắt đầu phát nhạc sau khi tải xong
       await _audioPlayer.play();
 
       setState(() {
@@ -149,6 +162,12 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
       await _audioPlayer.setAutomaticallyWaitsToMinimizeStalling(true);
     } catch (e) {
       print('Lỗi khi tải file audio: $e');
+      // Hiển thị thông báo lỗi
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Lỗi khi phát nhạc: $e')),
+        );
+      }
     }
   }
 
@@ -294,7 +313,7 @@ class _NowPlayingScreenState extends State<NowPlayingScreen>
                         ),
                       ],
                       image: DecorationImage(
-                        image: AssetImage(_currentSong.coverImage),
+                        image: AssetImage(_currentSong.fullCoverPath),
                         fit: BoxFit.cover,
                       ),
                     ),

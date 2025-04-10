@@ -21,6 +21,15 @@ class Song {
     this.isFavorite = false,
   });
 
+  // Lấy đường dẫn đầy đủ cho tệp âm thanh
+  String get fullAssetPath =>
+      assetPath.startsWith('assets/') ? assetPath : 'assets/audio/$assetPath';
+
+  // Lấy đường dẫn đầy đủ cho hình ảnh cover
+  String get fullCoverPath => coverImage.startsWith('assets/')
+      ? coverImage
+      : 'assets/images/$coverImage';
+
   // Tạo một bản sao của đối tượng song với các thuộc tính có thể thay đổi
   Song copyWith({
     String? title,
